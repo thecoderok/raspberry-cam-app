@@ -15,7 +15,11 @@ using RpiServerApp.Services;
 
 namespace RpiServerApp
 {
+    using System.Text;
+    using Auth;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Options;
+    using Microsoft.IdentityModel.Tokens;
     using RpiProject.Models;
 
     public class Startup
@@ -86,9 +90,49 @@ namespace RpiServerApp
 
             app.UseStaticFiles();
 
-            app.UseIdentity();
-
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
+            // Add JWT generation endpoint:
+            // https://stormpath.com/blog/token-authentication-asp-net-core
+            var secretKey = Configuration["JwtSectedKey"];
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+
+            var options = new TokenProviderOptions
+            {
+                Audience = "ExampleAudience",
+                Issuer = "ExampleIssuer",
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+            };
+            app.UseMiddleware<TokenProviderMiddleware>(Options.Create(options));
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                // The signing key must match!
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = signingKey,
+
+                // Validate the JWT Issuer (iss) claim
+                ValidateIssuer = true,
+                ValidIssuer = "ExampleIssuer",
+
+                // Validate the JWT Audience (aud) claim
+                ValidateAudience = true,
+                ValidAudience = "ExampleAudience",
+
+                // Validate the token expiry
+                ValidateLifetime = true,
+
+                // If you want to allow a certain amount of clock drift, set that here:
+                ClockSkew = TimeSpan.Zero
+            };
+
+            app.UseJwtBearerAuthentication(new JwtBearerOptions
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                TokenValidationParameters = tokenValidationParameters
+            });
+
+            app.UseIdentity();
 
             app.UseMvc(routes =>
             {
