@@ -1,0 +1,2 @@
+wget http://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/2.2.1/swagger-codegen-cli-2.2.1.jar -O swagger-codegen-cli.jar
+java -jar modules/swagger-codegen-cli/target/swagger-codegen-cli.jar generate -i http://localhost:5000/swagger/v1/swagger.json -l python -o python_api_client
