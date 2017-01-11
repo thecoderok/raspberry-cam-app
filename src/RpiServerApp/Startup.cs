@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -17,13 +14,15 @@ namespace RpiServerApp
 {
     using System.Text;
     using Auth;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using RpiProject.Models;
+    using Swashbuckle.AspNetCore.Swagger;
 
     public class Startup
     {
+        private readonly bool isDevelopmentMode = false;
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -38,6 +37,7 @@ namespace RpiServerApp
 
                 // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
                 builder.AddApplicationInsightsSettings(developerMode: true);
+                isDevelopmentMode = true;
             }
 
             builder.AddEnvironmentVariables();
@@ -65,6 +65,14 @@ namespace RpiServerApp
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddSingleton<IPhotoEntryRepository, InMemoryPhotoEntryRepository>();
+
+            if (isDevelopmentMode)
+            {
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new Info {Title = "RaspberryPi WebCam Server", Version = "v1"});
+                });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -140,6 +148,15 @@ namespace RpiServerApp
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            if (isDevelopmentMode)
+            {
+                app.UseSwagger();
+                app.UseSwaggerUi(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "RaspberryPi WebCam Server");
+                });
+            }
         }
     }
 }
