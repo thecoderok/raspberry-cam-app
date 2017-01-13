@@ -18,6 +18,7 @@ namespace RpiServerApp
     using Microsoft.IdentityModel.Tokens;
     using RpiProject.Models;
     using Swashbuckle.AspNetCore.Swagger;
+    using WebStuff;
 
     public class Startup
     {
@@ -73,6 +74,8 @@ namespace RpiServerApp
                     c.SwaggerDoc("v1", new Info {Title = "RaspberryPi WebCam Server", Version = "v1"});
                 });
             }
+
+            services.AddScoped<ValidateMimeMultipartContentFilter>()
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
