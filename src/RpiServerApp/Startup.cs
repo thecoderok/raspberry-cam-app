@@ -79,6 +79,23 @@ namespace RpiServerApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            if (!isDevelopmentMode)
+            {
+                app.Use(async (context, next) =>
+                {
+                    if (context.Request.IsHttps)
+                    {
+                        await next();
+                    }
+                    else
+                    {
+                        var sslPortStr = ":443";
+                        var httpsUrl = $"https://{context.Request.Host.Host}{sslPortStr}{context.Request.Path}";
+                        context.Response.Redirect(httpsUrl);
+                    }
+                });
+            }
+
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory
                 .AddDebug()
