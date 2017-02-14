@@ -6,6 +6,7 @@ namespace RpiServerApp.Auth
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
@@ -13,13 +14,18 @@ namespace RpiServerApp.Auth
     {
         private readonly RequestDelegate _next;
         private readonly TokenProviderOptions _options;
+        private readonly string writerUsername;
+        private readonly string writerPassword;
 
         public TokenProviderMiddleware(
             RequestDelegate next,
-            IOptions<TokenProviderOptions> options)
+            IOptions<TokenProviderOptions> options,
+            IConfiguration config)
         {
             _next = next;
             _options = options.Value;
+            writerUsername = config["Auth:UserName"];
+            writerPassword = config["Auth:Password"];
         }
 
         public Task Invoke(HttpContext context)
@@ -86,12 +92,13 @@ namespace RpiServerApp.Auth
             await context.Response.WriteAsync(JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented }));
         }
 
-        private Task<ClaimsIdentity> GetIdentity(string username, string password)
+        private Task<ClaimsIdentity> GetIdentity(string uname, string pass
+            )
         {
             // DON'T do this in production, obviously!
-            if (username == "TEST" && password == "TEST123")
+            if (writerUsername == uname && writerPassword == pass)
             {
-                return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { }));
+                return Task.FromResult(new ClaimsIdentity(new System.Security.Principal.GenericIdentity(uname, "Token"), new Claim[] { }));
             }
 
             // Credentials are invalid, or account doesn't exist
