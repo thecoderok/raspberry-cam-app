@@ -10,14 +10,16 @@ namespace RpiProject.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Models;
+    using RpiServerApp.Data;
     using RpiServerApp.WebStuff;
 
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class PhotoEntryController : Controller
     {
         private const string UploadFolder = "Images";
         private readonly IPhotoEntryRepository photoEntryRepository;
+        private readonly ApplicationDbContext dbContext;
         private readonly ILogger<PhotoEntryController> logger;
         private static readonly char[] InvalidFileNameChars;
         private const long MaxFileSizeBytes = 524288; // 0.5MB
@@ -28,11 +30,13 @@ namespace RpiProject.Controllers
         }
 
         public PhotoEntryController(IPhotoEntryRepository photoEntryRepository,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            ApplicationDbContext dbContext)
         {
             this.logger = loggerFactory.CreateLogger<PhotoEntryController>();
             this.logger.LogDebug("Created PhotoEntryController instance");
             this.photoEntryRepository = photoEntryRepository;
+            this.dbContext = dbContext;
 
             if (!Directory.Exists(UploadFolder))
             {
@@ -84,6 +88,14 @@ namespace RpiProject.Controllers
             string destination = Path.Combine(fullFolder, fileName);
             logger.LogInformation("Saving file to: {0}.", destination);
             await file.SaveAsAsync(destination);
+
+            var entry = new WebcamCapture()
+            {
+                WhenAdded = DateTime.Now,
+                Location = destination
+            };
+            dbContext.WebcamCaptures.Add(entry);
+            await dbContext.SaveChangesAsync();
 
             return Ok();
         }
