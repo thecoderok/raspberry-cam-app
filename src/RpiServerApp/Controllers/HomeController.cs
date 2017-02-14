@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RpiServerApp.Controllers
 {
+    using Microsoft.AspNetCore.Authorization;
+
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -13,18 +12,14 @@ namespace RpiServerApp.Controllers
             return View();
         }
 
-        public IActionResult About()
+        public IActionResult ShowLatest(string u, string p)
         {
-            ViewData["Message"] = "Your application description page.";
+            if (string.IsNullOrWhiteSpace(u) || string.IsNullOrWhiteSpace(p))
+            {
+                throw new ArgumentNullException();
+            }
 
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
+            return null;
         }
 
         public IActionResult Error()
