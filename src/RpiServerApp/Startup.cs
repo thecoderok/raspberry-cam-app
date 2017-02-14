@@ -11,6 +11,7 @@ using RpiServerApp.Services;
 
 namespace RpiServerApp
 {
+    using System.IO;
     using System.Text;
     using Auth;
     using Data;
@@ -19,6 +20,8 @@ namespace RpiServerApp
     using RpiProject.Models;
     using Swashbuckle.AspNetCore.Swagger;
     using WebStuff;
+    using Serilog;
+    using Serilog.Events;
 
     public class Startup
     {
@@ -79,7 +82,15 @@ namespace RpiServerApp
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            loggerFactory
+                .AddDebug()
+                .AddSerilog();
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.RollingFile(Path.Combine(Directory.GetCurrentDirectory(), "logs/rpicamapp-{Date}.txt"))
+                .WriteTo.RollingFile(Path.Combine(Directory.GetCurrentDirectory(), "logs/rpicamapp-errors-{Date}.txt"), LogEventLevel.Error)
+                .CreateLogger();
 
             if (env.IsDevelopment())
             {

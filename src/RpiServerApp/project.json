@@ -46,7 +46,8 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
-    "Swashbuckle.AspNetCore": "1.0.0-rc1"
+    "Swashbuckle.AspNetCore": "1.0.0-rc1",
+    "Serilog.Extensions.Logging.File": "1.0.0"
   },
 
   "tools": {
