@@ -15,11 +15,8 @@ namespace RpiServerApp
     using System.Text;
     using Auth;
     using Data;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
-    using RpiProject.Models;
     using Swashbuckle.AspNetCore.Swagger;
     using WebStuff;
     using Serilog;
@@ -103,12 +100,6 @@ namespace RpiServerApp
             }
 
             app.UseStaticFiles();
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"Images")),
-                RequestPath = new PathString("/Captures")
-            });
 
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
             // Add JWT generation endpoint:

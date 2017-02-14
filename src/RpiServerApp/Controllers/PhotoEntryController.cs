@@ -16,7 +16,7 @@ namespace RpiProject.Controllers
     using RpiServerApp.WebStuff;
 
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class PhotoEntryController : Controller
     {
         private const string UploadFolder = "Images";
