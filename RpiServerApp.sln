@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E2BB12E5-AC0B-43C2-826D-0332B8CA1E47}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RpiServerApp", "src\RpiServerApp\RpiServerApp.xproj", "{80A0D522-A014-46BE-9BA1-2827A72E93CC}"

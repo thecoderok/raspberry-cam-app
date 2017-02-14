@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RpiServerApp.Data;
 using RpiServerApp.Models;
 using RpiServerApp.Services;
 
@@ -14,6 +13,7 @@ namespace RpiServerApp
 {
     using System.Text;
     using Auth;
+    using Data;
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using RpiProject.Models;
@@ -36,8 +36,6 @@ namespace RpiServerApp
                 // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
                 builder.AddUserSecrets();
 
-                // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
-                builder.AddApplicationInsightsSettings(developerMode: true);
                 isDevelopmentMode = true;
             }
 
@@ -51,8 +49,6 @@ namespace RpiServerApp
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddApplicationInsightsTelemetry(Configuration);
-
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -66,6 +62,7 @@ namespace RpiServerApp
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddSingleton<IPhotoEntryRepository, InMemoryPhotoEntryRepository>();
+            services.AddSingleton<IConfiguration>(Configuration);
 
             if (isDevelopmentMode)
             {
@@ -75,7 +72,7 @@ namespace RpiServerApp
                 });
             }
 
-            services.AddScoped<ValidateMimeMultipartContentFilter>()
+            services.AddScoped<ValidateMimeMultipartContentFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,20 +81,14 @@ namespace RpiServerApp
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseApplicationInsightsRequestTelemetry();
-
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
                 app.UseBrowserLink();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            app.UseApplicationInsightsExceptionTelemetry();
 
             app.UseStaticFiles();
 
@@ -109,8 +100,8 @@ namespace RpiServerApp
 
             var options = new TokenProviderOptions
             {
-                Audience = "ExampleAudience",
-                Issuer = "ExampleIssuer",
+                Audience = "MyHome",
+                Issuer = "VMG",
                 SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
             };
             app.UseMiddleware<TokenProviderMiddleware>(Options.Create(options));
@@ -123,11 +114,11 @@ namespace RpiServerApp
 
                 // Validate the JWT Issuer (iss) claim
                 ValidateIssuer = true,
-                ValidIssuer = "ExampleIssuer",
+                ValidIssuer = "VMG",
 
                 // Validate the JWT Audience (aud) claim
                 ValidateAudience = true,
-                ValidAudience = "ExampleAudience",
+                ValidAudience = "MyHome",
 
                 // Validate the token expiry
                 ValidateLifetime = true,
