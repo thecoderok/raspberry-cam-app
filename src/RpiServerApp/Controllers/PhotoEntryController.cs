@@ -4,10 +4,12 @@ namespace RpiProject.Controllers
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Models;
     using RpiServerApp.Data;
@@ -18,7 +20,6 @@ namespace RpiProject.Controllers
     public class PhotoEntryController : Controller
     {
         private const string UploadFolder = "Images";
-        private readonly IPhotoEntryRepository photoEntryRepository;
         private readonly ApplicationDbContext dbContext;
         private readonly ILogger<PhotoEntryController> logger;
         private static readonly char[] InvalidFileNameChars;
@@ -29,13 +30,12 @@ namespace RpiProject.Controllers
             InvalidFileNameChars = Path.GetInvalidFileNameChars();
         }
 
-        public PhotoEntryController(IPhotoEntryRepository photoEntryRepository,
+        public PhotoEntryController(
             ILoggerFactory loggerFactory,
             ApplicationDbContext dbContext)
         {
             this.logger = loggerFactory.CreateLogger<PhotoEntryController>();
             this.logger.LogDebug("Created PhotoEntryController instance");
-            this.photoEntryRepository = photoEntryRepository;
             this.dbContext = dbContext;
 
             if (!Directory.Exists(UploadFolder))
@@ -46,9 +46,21 @@ namespace RpiProject.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<PhotoEntry> GetAll()
+        public async Task<IEnumerable<PhotoEntry>> GetAll()
         {
-            return photoEntryRepository.GetAll();
+            var recent = await dbContext.WebcamCaptures
+                .OrderByDescending(e => e.WhenAdded)
+                .Take(200)
+                .ToListAsync();
+
+            var result = new List<PhotoEntry>();
+            foreach (var webcamCapture in recent)
+            {
+                var url = "/" + webcamCapture.Location;
+                var item = new PhotoEntry(url, webcamCapture.Id, webcamCapture.WhenAdded);
+                result.Add(item);
+            }
+            return result;
         }
 
         [HttpPost]
