@@ -46,7 +46,7 @@ def post_photo(token, path_to_file):
 def read_config():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     config = ConfigParser.ConfigParser()
-    config.readfp(open(dir_path + '\\config.ini'))
+    config.readfp(open(dir_path + '/config.ini'))
     return config
 
 if len(sys.argv) < 2:
