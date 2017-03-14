@@ -40,11 +40,18 @@ def post_photo(token, path_to_file):
     response = requests.post(url, headers=headers, files={'file': f})
     if response.status_code != 200:
         raise Exception('Failed to post photo: ' + str(response.status_code))
+    print "Photo posted successfully"
 
-def read_config:
+def read_config():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     config = ConfigParser.ConfigParser()
-    config.readfp(open('config.ini'))
+    config.readfp(open(dir_path + '\\config.ini'))
+    return config
 
-token = get_token("", "")
+
+config = read_config()
+user=config.get('Auth', 'user')
+password=config.get('Auth', 'password')
+token = get_token(user, password)
 get_entries(token)
 post_photo(token, 'C:/Users/vganzha/Desktop/Mr-T.png')
