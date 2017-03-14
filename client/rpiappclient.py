@@ -57,6 +57,7 @@ file_name = sys.argv[1]
 config = read_config()
 user=config.get('Auth', 'user')
 password=config.get('Auth', 'password')
+endpoint=config.get('Auth', 'endpoint')
 token = get_token(user, password)
 get_entries(token)
 post_photo(token, file_name)
