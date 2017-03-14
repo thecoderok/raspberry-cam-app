@@ -1,5 +1,6 @@
 import requests
 import json
+import ConfigParser, os
 
 endpoint = "http://localhost:5000/"
 
@@ -13,7 +14,7 @@ def get_token(username, password):
 
     print "Request to /token succeeded"
     decoded = json.loads(response.content)
-    
+
     # print json.dumps(decoded)
     token = decoded['access_token']
     if not token:
@@ -32,5 +33,18 @@ def get_entries(token):
     decoded = json.loads(response.content)
     print json.dumps(decoded)
 
-token = get_token("TEST", "TEST123")
+def post_photo(token, path_to_file):
+    headers = {'Accept': 'application/json', 'Authorization': 'Bearer ' + token}
+    url = endpoint + "api/PhotoEntry"
+    f = open(path_to_file, 'rb')
+    response = requests.post(url, headers=headers, files={'file': f})
+    if response.status_code != 200:
+        raise Exception('Failed to post photo: ' + str(response.status_code))
+
+def read_config:
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('config.ini'))
+
+token = get_token("", "")
 get_entries(token)
+post_photo(token, 'C:/Users/vganzha/Desktop/Mr-T.png')
