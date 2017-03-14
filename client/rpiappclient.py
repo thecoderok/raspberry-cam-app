@@ -1,6 +1,7 @@
 import requests
 import json
 import ConfigParser, os
+import sys
 
 endpoint = "http://localhost:5000/"
 
@@ -48,10 +49,14 @@ def read_config():
     config.readfp(open(dir_path + '\\config.ini'))
     return config
 
+if len(sys.argv) < 2:
+    raise Exception("File to upload should be passed as a command line argument")
+
+file_name = sys.argv[1]
 
 config = read_config()
 user=config.get('Auth', 'user')
 password=config.get('Auth', 'password')
 token = get_token(user, password)
 get_entries(token)
-post_photo(token, 'C:/Users/vganzha/Desktop/Mr-T.png')
+post_photo(token, file_name)
