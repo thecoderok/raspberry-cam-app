@@ -23,6 +23,7 @@ namespace RpiProject.Controllers
         private readonly ILogger<PhotoEntryController> logger;
         private static readonly char[] InvalidFileNameChars;
         private const long MaxFileSizeBytes = 524288; // 0.5MB
+        private const string ImageFileExtension = ".jpg";
 
         static PhotoEntryController()
         {
@@ -73,7 +74,7 @@ namespace RpiProject.Controllers
                 return BadRequest("Empty file input");
             }
 
-            if (!file.FileName.ToLower().EndsWith(".jpg"))
+            if (!file.FileName.ToLower().EndsWith(ImageFileExtension))
             {
                 return BadRequest("Invalid file extension");
             }
@@ -94,7 +95,7 @@ namespace RpiProject.Controllers
 
             string fileName = Path.GetTempFileName();
             fileName = Path.GetFileNameWithoutExtension(fileName);
-            fileName += "_" + DateTime.Now.ToString("yyyy_MMMM_dd_HH_mm_ss_tt_zz") + ".jpg";
+            fileName += "_" + DateTime.Now.ToString("yyyy_MMMM_dd_HH_mm_ss_tt_zz") + ImageFileExtension;
             fileName = SanitizeFileName(fileName);
 
             string destination = Path.Combine(fullFolder, fileName);
