@@ -27,7 +27,8 @@ namespace RpiProject.Controllers
 
         static PhotoEntryController()
         {
-            InvalidFileNameChars = Path.GetInvalidFileNameChars();
+            var temp = new List<char>(Path.GetInvalidFileNameChars()) {'+'};
+            InvalidFileNameChars = temp.ToArray();
         }
 
         public PhotoEntryController(
@@ -73,7 +74,7 @@ namespace RpiProject.Controllers
                 return BadRequest("Empty file input");
             }
 
-            if (!file.FileName.ToLower().EndsWith(".png"))
+            if (!file.FileName.ToLower().EndsWith(".jpg"))
             {
                 return BadRequest("Invalid file extension");
             }
@@ -94,7 +95,7 @@ namespace RpiProject.Controllers
 
             string fileName = Path.GetTempFileName();
             fileName = Path.GetFileNameWithoutExtension(fileName);
-            fileName += "_" + DateTime.Now.ToString("yyyy_MMMM_dd_HH_mm_ss_tt_zz") + ".png";
+            fileName += "_" + DateTime.Now.ToString("yyyy_MMMM_dd_HH_mm_ss_tt_zz") + ".jpg";
             fileName = SanitizeFileName(fileName);
 
             string destination = Path.Combine(fullFolder, fileName);
@@ -119,7 +120,7 @@ namespace RpiProject.Controllers
                 throw new ArgumentNullException(nameof(fileName));
             }
 
-            return string.Join("_", fileName.Split());
+            return string.Join("_", fileName.Split(InvalidFileNameChars));
         }
     }
 }
